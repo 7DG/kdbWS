@@ -4,6 +4,7 @@ WebSocket feedhandler for kdb+
 # Config
 kdbWS config is controlled by command line arguments:
 | Flag | Required | Description |
+|------|----------|-------------|
 | kdbhost | Yes | Hostname (or IP) of kdb+ controller process
 | kdbport | Yes | Port of kdb+ controller process
 | kdbauth | No | Auth of kdb+ controller process (in Basic format e.g. 'user:pass')
