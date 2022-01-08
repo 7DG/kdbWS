@@ -1,4 +1,4 @@
-// Ensure this script is started with q example.q -E 2 -p XXXXX
+// Ensure this script is started with q example.q -E 1 -p XXXXX
 
 // load config
 \l exampleConfig.q
