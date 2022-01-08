@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/base64"
+	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 
@@ -19,9 +22,21 @@ func openWebsocket() (*websocket.Conn, error) {
 		scheme = "wss"
 	}
 	u := url.URL{Scheme: scheme, Host: *masterConfig.wshost, Path: *masterConfig.wspath}
+	var reqheader http.Header
+
+	// Basic auth handling
+	if *masterConfig.wsauthtype == "Basic" {
+		reqheader = http.Header{}
+		reqheader.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(*masterConfig.wsauth)))
+	}
+
+	// Bearer auth handling
+	if *masterConfig.wsauthtype == "Bearer" {
+		return nil, fmt.Errorf("Bearer auth currently unsupported")
+	}
 
 	masterLog.Printf("INFO: Connecting to WebSocket target at %v\n", u.String())
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	c, _, err := websocket.DefaultDialer.Dial(u.String(), reqheader)
 	return c, err
 }
 

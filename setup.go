@@ -15,6 +15,8 @@ type cmdArgs struct {
 	kdbauth         *string
 	wshost          *string
 	wspath          *string
+	wsauthtype      *string
+	wsauth          *string
 	useTLS          *bool
 	tlskeyfile      *string
 	tlscertfile     *string
@@ -42,6 +44,8 @@ func parseCmdArgs() error {
 	masterConfig.wshost = flag.String("wshost", "", "Host address of Websocket target")
 	masterConfig.kdbauth = flag.String("kdbauth", "", "OPTIONAL: auth of KDB+ master process to connect to (user:pass)")
 	masterConfig.wspath = flag.String("wspath", "", "OPTIONAL: Path of Websocket endpoint")
+	masterConfig.wsauth = flag.String("wsauth", "", "OPTIONAL: Auth for the Websocket endpoint. REQUIREFLAGS: wsauthtype")
+	masterConfig.wsauthtype = flag.String("wsauthtype", "", "OPTIONAL: Auth type (Basic or Bearer) for the Websocket endpoint. REQUIREFLAGS: wsauth")
 	masterConfig.useTLS = flag.Bool("useTLS", false, "OPTIONAL: Flag to use TLS Websocket connection. REQUIREFLAGS: tlskeyfile, tlscertflags")
 	masterConfig.tlskeyfile = flag.String("tlskeyfile", "", "OPTIONAL: TLS key to use for Secure WS connection")
 	masterConfig.tlscertfile = flag.String("tlscertfile", "", "OPTIONAL: TLS cert to use for Secure WS connection")
@@ -66,6 +70,14 @@ func parseCmdArgs() error {
 		return fmt.Errorf("useTLS flag is provided but tlscertfile is not defined")
 	case *masterConfig.onInitCallback == "" && *masterConfig.onMsgCallback == "" && *masterConfig.onCloseCallback == "":
 		return fmt.Errorf("no kdb+ callbacks defined; at least one of the following must be defined: onInitCallback, onMsgCallback, onCloseCallback")
+
+	case *masterConfig.wsauth == "" && *masterConfig.wsauthtype != "":
+		return fmt.Errorf("wsauthtype is provided but no wsauth is defined")
+	case *masterConfig.wsauth != "" && *masterConfig.wsauthtype == "":
+		return fmt.Errorf("wsauth is provided but no wsauthtype is defined")
+	case *masterConfig.wsauthtype != "" && *masterConfig.wsauthtype != "Bearer" && *masterConfig.wsauthtype != "Basic":
+		return fmt.Errorf("wsauthtype unsupported (only Bearer or Basic auth supported)")
+
 	default:
 		_, fchk := os.Stat(*masterConfig.tlskeyfile)
 		if os.IsNotExist(fchk) {
@@ -153,7 +165,7 @@ func printMasterConfigToLog() {
 		masterLog.Printf("INFO: wspath: %v\n", *masterConfig.wspath)
 	}
 	// TLS args
-	masterLog.Printf("INFO: useSSL: %v\n", *masterConfig.useTLS)
+	masterLog.Printf("INFO: useTLS: %v\n", *masterConfig.useTLS)
 	if *masterConfig.useTLS {
 		masterLog.Printf("INFO: tlskeyfile: %v\n", *masterConfig.tlskeyfile)
 		masterLog.Printf("INFO: tlscertfile: %v\n", *masterConfig.tlscertfile)
