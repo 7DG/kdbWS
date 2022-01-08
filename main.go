@@ -54,6 +54,7 @@ func main() {
 		onFinish()
 		os.Exit(7)
 	}
+	masterLog.Println("INFO: Successfully connected to WebSocket target")
 
 	// Send initialisation success signal to KDB
 	sendInitCallback(kdbHandle)
